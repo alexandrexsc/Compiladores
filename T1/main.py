@@ -16,7 +16,7 @@ arquivo_fonte = open(path_arquivo_fonte, mode='r', encoding='utf-8')
 
 letras = list(string.ascii_letters)
 numeros = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-palavras = ['inicio', 'varinicio', 'varfim', 'escreva', 'leia', 'se', 'entao', 'fimse', 'Repita', 'fimRepita', 'fim', 'inteiro', 'literal', 'real']
+reservadas = ['inicio', 'varinicio', 'varfim', 'escreva', 'leia', 'se', 'entao', 'fimse', 'Repita', 'fimRepita', 'fim', 'inteiro', 'literal', 'real']
 estados_finais = pd.read_csv('Automato.csv')
 
 #Scanner
@@ -70,24 +70,23 @@ for i in arquivo_fonte.read():
             lexemacompleto=1
 
     if(lexemacompleto == 1):
-        palavra.pop()
+        next = palavra.pop()
         lexema = ''.join(palavra)
-        palavra = []
-        if(estado in estados_finais['estado'].values and lexema not in palavras):
+        if(estado in estados_finais['estado'].values and lexema not in reservadas):
             df1 = pd.DataFrame({
                 'Classe': [estados_finais.loc[estado][1]],
                 'Lexema': [lexema],
                 'Tipo': [estados_finais.loc[estado][3]]
                 })
             tabela = pd.concat([tabela,df1], ignore_index = True)
-        if(lexema in palavras):
+        elif(lexema in reservadas):
             df1 = pd.DataFrame({
                 'Classe': [lexema],
                 'Lexema': [lexema],
                 'Tipo': [lexema]
                 })
             tabela = pd.concat([tabela,df1], ignore_index = True)
-        if(lexema not in palavras and estado not in estados_finais['estado'].values):
+        else:
             df1 = pd.DataFrame({
                 'Classe': ['ERRO'],
                 'Lexema': [lexema],
@@ -98,5 +97,8 @@ for i in arquivo_fonte.read():
         estado = 0
         lexema = ''
         lexemacompleto = 0
+        palavra = []
+        if(next!=" " or next!="\n" or next!="\t"):
+            palavra.append(str(next))
 
 print(tabela)
